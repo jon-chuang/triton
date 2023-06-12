@@ -211,7 +211,9 @@ public:
     ttg::MmaEncodingAttr mmaEnc;
     if (versionMajor == 1) {
       SetVector<Operation *> aBwdSlices, bBwdSlices;
-      auto isCvt = [](Operation *op) { return isa<ConvertLayoutOp>(op); };
+      mlir::TransitiveFilter isCvt = [](Operation *op) {
+        return isa<ConvertLayoutOp>(op);
+      };
       getBackwardSlice(a, &aBwdSlices, {isCvt});
       getBackwardSlice(b, &bBwdSlices, {isCvt});
       // get the source of the first conversion found in slices
