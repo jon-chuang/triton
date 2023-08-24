@@ -586,9 +586,17 @@ public:
             continue;
           // This wrapping rule must be consistent with emitCTAOffsetForLayout
           unsigned splitNum = std::min<unsigned>(shape[dim], CTASplitNum[dim]);
-          multiDimClusterCTAId[dim] =
-              urem(multiDimClusterCTAId[dim], i32_val(splitNum));
-          mask = and_(mask, icmp_eq(multiDimClusterCTAId[dim], _0));
+          Value repId = udiv(multiDimClusterCTAId[dim], i32_val(splitNum));
+          // Consider the example where CTAsPerCGA = [4] and CTASplitNum = [2]:
+          //     CTA0 and CTA2 holds data of block0,
+          //     CTA1 and CTA3 holds data of block1.
+          // Only CTA0 and CTA1 are expected to write while CTA2 and CTA3 should
+          // be masked. We add the following mask:
+          //     multiDimClusterCTAId[dim] / splitNum == 0
+          // Actually in all existing cases of multicast, splitNum is always 1.
+          // The mask is equivalent to:
+          //     multiDimClusterCTAId[dim] == 0
+          mask = and_(mask, icmp_eq(repId, _0));
         }
       }
     } else {

@@ -121,6 +121,11 @@ public:
     auto newEncoding =
         newOperands[0].getType().cast<RankedTensorType>().getEncoding();
 
+    // This will result in cross-CTA reduction, which is not implemented yet
+    if (triton::gpu::getCTASplitNum(newEncoding)[reduce.getAxis()] > 1) {
+      return failure();
+    }
+
     // this may generate unsupported conversions in the LLVM codegen
     if (newEncoding.isa<triton::gpu::MmaEncodingAttr>()) {
       return failure();
