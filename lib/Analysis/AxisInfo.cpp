@@ -178,7 +178,7 @@ public:
     auto start = op.getStart();
     auto end = op.getEnd();
     return AxisInfo(/*contiguity=*/{end - start},
-                    /*divisibility=*/{highestPowOf2Divisor(start)},
+                    /*divisibility=*/{highestPowOf2Divisor(start - end)},
                     /*constancy=*/{1});
   }
 };
